@@ -11,7 +11,7 @@ export default function Home() {
       <Layout>
         <GlobalStyles/>
         <HomeWrapper>
-          <Link href="/pizzaSize">
+          <Link href="/Sizes">
             <Button onClick={() => {}}>Iniciar pedido</Button>
           </Link>
         </HomeWrapper>
