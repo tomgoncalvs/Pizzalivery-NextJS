@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { colors } from "../../styles/Colors";
 
 export const ElementMain = styled.main`
-  min-height: calc(100vh - 168px);
+  min-height: calc(100vh - 154px);
   background-color: ${colors.secondary.main};
 `;
 
