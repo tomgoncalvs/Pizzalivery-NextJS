@@ -1,19 +1,32 @@
+"use client"
 import { useContext, useEffect, useState } from "react"
-import { ElementButton } from "../../../components/button/Button.style"
+import { useRouter } from "next/router"
+import  Button  from "../../../components/button/Button"
 import { Layout } from "../../../components/layout/Layout"
 import { Title } from "../../../components/title/Title"
 import { RadioCard, SizeActionWrapper, SizeContentWrapper } from "./sizes.style"
-import OrderContext from "../../contexts/OrderContext"
-import Link from "next/link"
+import OrderContext from "../../../contexts/contexts"
 
-export default async function Sizes() {
-  const response = await fetch ('http://localhost:8000/pizza/sizes')
-  const pizzaSizeOptions = await response.json()
-
+export default function Sizes() {
+  const router = useRouter()
   const { pizzaSize, setPizzaSize } = useContext(OrderContext)
 
   const [sizeId, setSizeId] = useState("")
+  const [pizzaSizeOptions, setPizzaSizeOptions] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+
+  const getPizzaSizeOptions = async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch("http://localhost:8000/pizza/sizes")
+      const options = await response.json()
+      setPizzaSizeOptions(options)
+    } catch (error) {
+      alert(`Deu ruim: ${error}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const getPizzaSize = (sizeId: string) => {
     return pizzaSizeOptions.filter((option) => option.id === sizeId)
@@ -23,10 +36,19 @@ export default async function Sizes() {
     setSizeId(event.target.value)
   }
 
+  const handleBack = () => {
+    router.push("/")  // substitui por sua rota inicial
+  }
+
   const handleNext = () => {
     const selectedSize = getPizzaSize(sizeId)
     const selectedFlavour = selectedSize[0].flavours
     setPizzaSize(selectedSize)
+
+    if (selectedFlavour == 1) {
+      router.push("/pizzaFlavour")  
+    } else if(selectedFlavour == 2) {
+      router.push("/pizzaDualFlavour") 
   }
 
   useEffect(() => {
@@ -34,9 +56,9 @@ export default async function Sizes() {
     setSizeId(pizzaSize[0].id)
   }, [])
   
-  // useEffect(() => {
-  //   getPizzaSizeOptions()
-  // }, [])
+  useEffect(() => {
+    getPizzaSizeOptions()
+  }, [])
 
   return (
     <Layout>
@@ -61,12 +83,8 @@ export default async function Sizes() {
         </SizeContentWrapper>
       )}
       <SizeActionWrapper>
-        <Link href='/'>
-            <ElementButton inverse="inverse">Voltar</ElementButton>
-        </Link>
-        <Link href='/flavours'>
-            <ElementButton onClick={handleNext}>Escolha o Sabor</ElementButton>
-        </Link>
+        <Button inverse="inverse" onClick={handleBack}>Voltar</Button>
+        <Button onClick={handleNext}>Escolha o Sabor</Button>
       </SizeActionWrapper>
     </Layout>
   )

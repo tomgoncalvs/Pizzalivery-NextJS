@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from "react";
+"use client"
+import { createContext, useState } from "react";
 
 interface PizzaSizeType {
     id: string
@@ -48,17 +49,16 @@ type OrderContextProps = {
     setOrderInformation: React.Dispatch<React.SetStateAction<OrderInformationType>>;
 }
 
-const OrderContext = createContext<OrderContextProps>({})
+const OrderContext = createContext<OrderContextProps | null>(null)
 
-import React from "react";
-const OrderContextProvider = ({children}: {children: React.ReactNode}) => {
-    const [pizzaSize, setPizzaSize] = useState<PizzaSizeType>()
-    const [pizzaFlavour, setPizzaFlavour] = useState<PizzaFlavourType>()
-    const [pizzaOrder, setPizzaOrder] = useState<PizzaOrderType>()
-    const [orderInformation, setOrderInformation] = useState<OrderInformationType>()
+const OrderContextProvider = ({children}) => {
+    const [pizzaSize, setPizzaSize] = useState<PizzaSizeType | null>(null);
+    const [pizzaFlavour, setPizzaFlavour] = useState<PizzaFlavourType | null>(null);
+    const [pizzaOrder, setPizzaOrder] = useState<PizzaOrderType | null>(null);
+    const [orderInformation, setOrderInformation] = useState<OrderInformationType | null>(null);
 
     return (
-        <OrderContext.Provider value={{pizzaSize, setPizzaSize, pizzaFlavour, setPizzaFlavour, pizzaOrder, setPizzaOrder, orderInformation, setOrderInformation}}>
+        <OrderContext.Provider value={{pizzaSize, setPizzaSize, pizzaFlavour, setPizzaFlavour, pizzaOrder, setPizzaOrder, orderInformation, setOrderInformation }}>
             {children}
         </OrderContext.Provider>
     )

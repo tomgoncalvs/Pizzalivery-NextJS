@@ -1,8 +1,9 @@
+"use client"
 import { Layout } from "../../../components/layout/Layout"
 import  Button  from "../../../components/button/Button";
 import { Title } from "../../../components/title/Title"
 import { useContext, useEffect, useState } from "react";
-import OrderContext from "../../contexts/OrderContext";
+import OrderContext from "../../../contexts/contexts";
 
 import { convertToCurrency } from "../../helpers/convertToCurrency";
 
