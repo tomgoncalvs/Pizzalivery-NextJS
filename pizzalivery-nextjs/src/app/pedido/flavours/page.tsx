@@ -1,9 +1,16 @@
-"use client"
-import { Layout } from "../../../components/layout/Layout"
-import  Button  from "../../../components/button/Button";
-import { Title } from "../../../components/title/Title"
+"use client";
+
 import { useContext, useEffect, useState } from "react";
-import OrderContext from "../../../contexts/contexts";
+import { useRouter } from "next/navigation";
+import Image from 'next/image';
+import Button from "../../../components/button/Button";
+import { Layout } from "../../../components/layout/Layout";
+import OrderContext from "../../../contexts/OrderContext";
+
+import Mussarela from "../../../assets/pizza-flavours/mucarela.png"
+import ChickenWithCheese from "../../../assets/pizza-flavours/frango-catupiry.png";
+import Margherita from "../../../assets/pizza-flavours/margherita.png";
+import Lusa from "../../../assets/pizza-flavours/portuguesa.png";
 
 import { convertToCurrency } from "../../helpers/convertToCurrency";
 
@@ -15,86 +22,78 @@ import {
   FlavourCardPrice,
   FlavourCardTitle,
   FlavourContentWrapper,
-} from "./Flavours.style"
+} from "./Flavours.style";
+import { Title } from "../../../components/title/Title";
 
 export default function Flavours() {
-  const navigate = useNavigate()
-  const { pizzaSize, pizzaFlavour, setPizzaFlavour} = useContext(OrderContext)
-  const [ flavourId, setFlavourId ] = useState("")
-  const [ pizzaFlavoursOptions, setPizzaFlavoursOptions ] = useState([])
-  const [ isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const { pizzaSize, pizzaFlavour, setPizzaFlavour } = useContext(OrderContext);
+  const [flavourId, setFlavourId] = useState("");
+  const [flavoursOptions, setFlavoursOptions] = useState([]);
 
-  const getFlavoursOptions = async () => {
-    setIsLoading(true)
+  const getPizzaFlavoursOptions = async () => {
     try {
-      const response = await fetch("http://localhost:8000/pizza/flavours")
-      const options = await response.json()
-      setPizzaFlavoursOptions(options)
+      const response = await fetch("http://localhost:8000/pizza/flavours");
+      const options = await response.json();
+      setFlavoursOptions(options);
     } catch (error) {
-      alert(`Deu ruim: ${error}`)
-    } finally {
-      setIsLoading(false)
+      // Aqui você deve tratar o erro de forma amigável ao usuário
+      console.error(`Error fetching pizza flavours: ${error}`);
     }
-  }
+  };
 
-  const getPizzaFlavour = (id:string) => {
-    return pizzaFlavoursOptions.filter((flavour) => flavour.id === id)
-  }
+  useEffect(() => {
+    getPizzaFlavoursOptions();
+  }, []);
 
-  const handleClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFlavourId(event.target.id)
-  }
+  const handleClick = (id) => {
+    setFlavourId(id);
+  };
 
   const handleBack = () => {
-    navigate(routes.pizzaSize)
-  }
+    router.push("/pizzaSize");
+  };
 
   const handleNext = () => {
-    const selectedFlavour = getPizzaFlavour(flavourId)
-    setPizzaFlavour(selectedFlavour)
-    navigate(routes.summary)
-  }
+    const selectedFlavour = flavoursOptions.find(flavour => flavour.id === flavourId);
+    if (selectedFlavour) {
+      setPizzaFlavour(selectedFlavour);
+      router.push("/summary");
+    }
+  };
 
   useEffect(() => {
-    if (!pizzaFlavour) return
-    
-    setFlavourId(pizzaFlavour[0].id)
-  }, [])
-
-  useEffect(() => {
-    getFlavoursOptions()
-  }, [])
+    if (pizzaFlavour) {
+      setFlavourId(pizzaFlavour.id);
+    }
+  }, [pizzaFlavour]);
 
   return (
     <Layout>
       <Title tabIndex={0}>Agora escolha o sabor da sua pizza</Title>
-      { isLoading ? (
-        <FlavourContentWrapper>
-          <Title>Carregando...</Title>
-        </FlavourContentWrapper>
-      ) : (
       <FlavourContentWrapper>
-        {pizzaFlavoursOptions.map(({ id, image, name, description, price }) => (
-          <FlavourCard key={id} selected={id === flavourId ? true : false}>
-            <FlavourCardImage  src={image} alt={name} width="200px" />
+        {flavoursOptions.map(({ id, image, name, description, price }) => (
+          <FlavourCard key={id} selected={id === flavourId}>
+            <FlavourCardImage>
+              <Image src={image} alt={name} layout="fill" />
+            </FlavourCardImage>
             <FlavourCardTitle>{name}</FlavourCardTitle>
             <FlavourCardDescription>{description}</FlavourCardDescription>
             <FlavourCardPrice>
-              {convertToCurrency(price[pizzaSize[0].slices])}
+              {convertToCurrency(price[pizzaSize?.slices || 0])}
             </FlavourCardPrice>
-            <Button id={id} onClick={handleClick}>
+            <Button onClick={() => handleClick(id)}>
               Selecionar
             </Button>
           </FlavourCard>
         ))}
       </FlavourContentWrapper>
-      )}      
       <FlavourActionWrapper>
         <Button inverse="inverse" onClick={handleBack}>
           Voltar
         </Button>
-        <Button onClick={handleNext}>Seguir para o resumo</Button>
+        <Button onClick={handleNext}>Próximo</Button>
       </FlavourActionWrapper>
     </Layout>
-  )
+  );
 }
